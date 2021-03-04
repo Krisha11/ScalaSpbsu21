@@ -4,53 +4,33 @@ import org.spbsu.mkn.scala.IntList._
 
 import scala.runtime.Nothing$
 
-sealed trait IntList extends Any{
+sealed trait IntList {
   def head: Int
   def tail: IntList
   def drop(n: Int): IntList
   def take(n: Int): IntList
   def map(f: Int => Int): IntList
-  def ::(elem: Int): IntList = {
-    val tmp = this
-    new IntList {
-      override def head = elem
-      override def tail:IntList = tmp
-      override def drop(n: Int): IntList = n match {
-        case 0          => this
-        case 1          => tail
-        case _ if n > 1 => tail.drop(n - 1)
-        case _ if n < 0  => throw new UnsupportedOperationException("operation is undefined")
-      }
-      override def take(n: Int): IntList = n match {
-        case 0          => IntNil
-        case 1 => head :: IntNil
-        case _ if n > 1  => head :: tail.take(n - 1)
-        case _ if n < 0  => throw new UnsupportedOperationException("operation is undefined")
-      }
-      override def map(f: Int => Int): IntList = f(head)::tail.map(f)
-
-
-      override def equals(obj: Any): Boolean = {
-        obj match {
-          case IntNil      => this.hashCode() == IntNil.hashCode()
-          case obj:IntList => (head == obj.head && tail.equals(obj.tail))
-          case _           => false
-        }
-      }
-    }
-  }
-
-   override def equals(obj: Any): Boolean = {
-     obj match {
-       case IntNil      => this.hashCode() == IntNil.hashCode()
-       case obj:IntList => (head == obj.head && tail.equals(obj.tail))
-       case _           => false
-     }
-   }
-
+  def ::(elem: Int): IntList = MyIntList(elem, this)
 }
 
-object IntList {
+case class MyIntList(head : Int, tail : IntList = IntNil) extends IntList {
+  override def drop(n: Int): IntList = n match {
+    case 0          => this
+    case 1          => tail
+    case _ if n > 1 => tail.drop(n - 1)
+    case _ if n < 0  => throw new UnsupportedOperationException("operation is undefined")
+  }
+  override def take(n: Int): IntList = n match {
+    case 0          => IntNil
+    case 1 => head :: IntNil
+    case _ if n > 1  => head :: tail.take(n - 1)
+    case _ if n < 0  => throw new UnsupportedOperationException("operation is undefined")
+  }
+  override def map(f: Int => Int): IntList = f(head)::tail.map(f)
+}
+
+
+case object IntList {
   def undef: Nothing = throw new UnsupportedOperationException("operation is undefined")
 
   def fromSeq(seq: Seq[Int]): IntList = {
@@ -74,15 +54,12 @@ object IntList {
 
 }
 
-object IntNil extends IntList {
+case object IntNil extends IntList {
   override def head: Int = throw new UnsupportedOperationException("operation is undefined")
   override def tail: IntList = IntNil
   override def drop(n: Int): IntList = throw new UnsupportedOperationException("operation is undefined")
   override def take(n: Int): IntList = throw new UnsupportedOperationException("operation is undefined")
   override def map(f: Int => Int): IntList = IntNil
-  override def equals(obj: Any): Boolean = {
-    obj.hashCode() == IntNil.hashCode()
-  }
   def undef: Nothing = throw new UnsupportedOperationException("operation is undefined")
   def sum(intList: IntList): Int      = throw new UnsupportedOperationException("operation is undefined")
   def size(intList: IntList): Int     = 0
